@@ -93,6 +93,7 @@
             this.btClose.TabIndex = 0;
             this.btClose.Text = "Закрыть";
             this.btClose.UseVisualStyleBackColor = true;
+            this.btClose.Click += new System.EventHandler(this.btClose_Click);
             // 
             // gbStandart
             // 
@@ -289,6 +290,7 @@
             this.btDepartmentDelete.TabIndex = 2;
             this.btDepartmentDelete.Text = "Удалить запись";
             this.btDepartmentDelete.UseVisualStyleBackColor = true;
+            this.btDepartmentDelete.Click += new System.EventHandler(this.btDepartmentDelete_Click);
             // 
             // btDepartmentUpdate
             // 
@@ -300,6 +302,7 @@
             this.btDepartmentUpdate.TabIndex = 1;
             this.btDepartmentUpdate.Text = "Изменить запись";
             this.btDepartmentUpdate.UseVisualStyleBackColor = true;
+            this.btDepartmentUpdate.Click += new System.EventHandler(this.btDepartmentUpdate_Click);
             // 
             // btDepartmentInsert
             // 
@@ -311,6 +314,7 @@
             this.btDepartmentInsert.TabIndex = 0;
             this.btDepartmentInsert.Text = "Добавить запись";
             this.btDepartmentInsert.UseVisualStyleBackColor = true;
+            this.btDepartmentInsert.Click += new System.EventHandler(this.btDepartmentInsert_Click);
             // 
             // pnDepartmentManup1
             // 
@@ -435,6 +439,7 @@
             this.tbDepartmentSearch.Size = new System.Drawing.Size(548, 22);
             this.tbDepartmentSearch.TabIndex = 0;
             this.tbDepartmentSearch.Text = "Введите название специальности...";
+            this.tbDepartmentSearch.TextChanged += new System.EventHandler(this.tbDepartmentSearch_TextChanged);
             this.tbDepartmentSearch.Enter += new System.EventHandler(this.tbDepartmentSearch_Enter);
             this.tbDepartmentSearch.Leave += new System.EventHandler(this.tbDepartmentSearch_Leave);
             // 

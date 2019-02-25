@@ -53,5 +53,57 @@ namespace Studing_Journal
                 error_message += "\n" + DateTime.Now.ToLongDateString() + ex.Message;
             }
         }
+
+        public static string OrganizationName = "", DirPath = "";
+        public static double DocLM = 0, DocTM = 0, DocRM = 0, DocBM = 0;
+
+        public void ConfigurationGet()
+        {
+            RegistryKey registry = Registry.CurrentUser;
+            RegistryKey registryKey = registry.CreateSubKey("Journal");
+            RegistryKey subKey = registryKey.CreateSubKey("Configuration");
+
+            try
+            {
+                OrganizationName = subKey.GetValue("OrganizationName").ToString();
+                DirPath = subKey.GetValue("DirPath").ToString();
+                DocLM = Convert.ToDouble(subKey.GetValue("DocLM").ToString());
+                DocTM = Convert.ToDouble(subKey.GetValue("DocTM").ToString());
+                DocRM = Convert.ToDouble(subKey.GetValue("DocRM").ToString());
+                DocBM = Convert.ToDouble(subKey.GetValue("DocBM").ToString());
+            }
+            catch
+            {
+                subKey.SetValue("OraganizationName", "Empty");
+                subKey.SetValue("DirPath", "Empty");
+                subKey.SetValue("DocLM", 0.0);
+                subKey.SetValue("DocTM", 0.0);
+                subKey.SetValue("DocRM", 0.0);
+                subKey.SetValue("DocBM", 0.0);
+            }
+        }
+
+        public void MajorConfigurationSet(string Organization_Name)
+        {
+            RegistryKey registry = Registry.CurrentUser;
+            RegistryKey registryKey = registry.CreateSubKey("Journal");
+            RegistryKey subKey = registryKey.CreateSubKey("Configuration");
+
+            subKey.SetValue("OrganizationName", Organization_Name);
+            ConfigurationGet();
+        }
+
+        public void DocumentConfiguration(string Path, decimal DocLM, decimal DocTM, decimal DocRM, decimal DocBM)
+        {
+            RegistryKey registry = Registry.CurrentUser;
+            RegistryKey registryKey = registry.CreateSubKey("Journal");
+            RegistryKey subKey = registryKey.CreateSubKey("Configuration");
+
+            subKey.SetValue("DirPath", Path);
+            subKey.SetValue("DocLM", DocLM);
+            subKey.SetValue("DocTM", DocTM);
+            subKey.SetValue("DocRM", DocRM);
+            subKey.SetValue("DocBM", DocBM);
+        }
     }
 }

@@ -6,9 +6,7 @@ namespace Studing_Journal
 {
     class DataBaseTables
     {
-        Registry_Class registry = new Registry_Class();
-        public SqlCommand command = new SqlCommand();
-        public event Action<DataTable> dtFillFull;
+        public SqlCommand command = new SqlCommand("", Registry_Class.sqlConnection);
         public DataTable dtAccess_rights = new DataTable("Access_rights");
         public DataTable dtProfile = new DataTable("Profile");
         public DataTable dtStandard = new DataTable("Standard");
@@ -22,6 +20,7 @@ namespace Studing_Journal
         public DataTable dtBurden = new DataTable("Burden");
         public DataTable dtExercise_Type = new DataTable("Exercise_Type");
         public DataTable dtJournal_of_the_lessons = new DataTable("Journal_of_the_lessons");
+        public SqlDependency dependency = new SqlDependency();
 
         public string qrAccess_rights = "select [ID_Access_rights],[Access_rights_name],[Head_of_Department],[Teacher], [CCMC], [Director], [Deputy_Director],[Student] from[dbo].[Access_rights] where[Access_rights_Logical_Delete] = 0",
             qrProfile = "select [Login_Profile],[Password_Profile], [System_access], [Access_rights_ID],  [Profile_Image] from[dbo].[Profile] where[Profile_Logical_Delete] = 0 and[Login_Profile]<> ''",
@@ -43,11 +42,10 @@ namespace Studing_Journal
             {
                 command.Notification = null;
                 command.CommandText = query;
-                command.Connection = Registry_Class.sqlConnection;
+                dependency.AddCommandDependency(command);
+                SqlDependency.Start(Registry_Class.sqlConnection.ConnectionString);
                 Registry_Class.sqlConnection.Open();
-                table.Load(command.ExecuteReader());
-                dtFillFull(table);
-                
+                table.Load(command.ExecuteReader());                
             }
             catch(Exception ex)
             {

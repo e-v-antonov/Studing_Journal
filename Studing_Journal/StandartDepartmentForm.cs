@@ -17,14 +17,62 @@ namespace Studing_Journal
         DataBaseTables tableDepartment = new DataBaseTables();
         DataBaseTables tableStandartcb = new DataBaseTables();
         DataBaseProcedure procedure = new DataBaseProcedure();
+        string filterDepartment;
+
         public StandartDepartmentForm()
         {
             InitializeComponent();
             Thread threadDepartment = new Thread(tableDepartment.dtDepartmentFill);
-            tableDepartment.dtFillFull += dtFillFullDepartment;
             threadDepartment.Start();
         }
         
+        private void dgvDepartmentFill()
+        {
+            Action action = () =>
+            {
+                DataBaseTables data = new DataBaseTables();
+                filterDepartment = data.qrDepartment;
+                data.dtDepartmentFill();
+                data.dependency.OnChange += onchangeDepartment;
+                dgvDepartment.DataSource = data.dtDepartment;
+                dgvDepartment.Columns[0].Visible = false;
+                dgvDepartment.Columns[1].HeaderText = "Номер специальности";
+                dgvDepartment.Columns[2].HeaderText = "Название специальности";
+                dgvDepartment.Columns[3].Visible = false;
+                dgvDepartment.Columns[4].HeaderText = "Группа стандартов";
+                dgvDepartment.Columns[5].Visible = false;
+            };
+            Invoke(action);
+        }
+
+        private void stbStandart()
+        {
+            Action action = () =>
+            {
+                DataBaseTables data = new DataBaseTables();
+                data.dtStandardFill();
+                data.dependency.OnChange += onchangeStandart;
+                lstbStandart.DataSource = data.dtStandard;
+                lstbStandart.ValueMember = "ID_Standard";
+                lstbStandart.DisplayMember = "Standard_name";
+            };
+            Invoke(action);
+        }
+
+        private void cbStandartDepartment()
+        {
+            Action action = () =>
+            {
+                DataBaseTables data = new DataBaseTables();
+                data.dtStandardFill();
+                data.dependency.OnChange += onchangeStandartDependency;
+                cbstandartDepartment.DataSource = data.dtStandard;
+                cbstandartDepartment.ValueMember = "ID_Standard";
+                cbstandartDepartment.DisplayMember = "Standard_name";
+            };
+            Invoke(action);
+        }
+
         private void dtFillFullStandart(DataTable data)
         {
             Action action = () =>
@@ -33,7 +81,6 @@ namespace Studing_Journal
                 lstbStandart.ValueMember = "ID_Standard";
                 lstbStandart.DisplayMember = "Standard_name";
                 Thread threadStandartcb = new Thread(tableStandartcb.dtStandardFill);
-                tableStandartcb.dtFillFull += dtFillFulltableStandartcb;
                 threadStandartcb.Start();
                 SqlDependency dependency = new SqlDependency(tableStandart.command);
                 dependency.OnChange += onchangeStandart;
@@ -44,8 +91,20 @@ namespace Studing_Journal
 
         private void onchangeStandart(object sender, SqlNotificationEventArgs e)
         {
-            if (e.Info != SqlNotificationInfo.Invalid) //&& (e.Type != SqlNotificationType.Subscribe))
-                dtFillFullStandart(tableDepartment.dtDepartment);
+            if (e.Info != SqlNotificationInfo.Invalid)
+                stbStandart();
+        }
+
+        private void onchangeStandartDependency(object sender, SqlNotificationEventArgs e)
+        {
+            if (e.Info != SqlNotificationInfo.Invalid)
+                cbStandartDepartment();
+        }
+
+        private void onchangeDepartment(object sender, SqlNotificationEventArgs e)
+        {
+            if (e.Info != SqlNotificationInfo.Invalid)
+                dgvDepartmentFill();
         }
 
         private void dtFillFullDepartment(DataTable data)
@@ -60,7 +119,6 @@ namespace Studing_Journal
                 dgvDepartment.Columns[4].HeaderText = "Стандарт";
                 dgvDepartment.Columns[5].Visible = false;
                 Thread threadStandart = new Thread(tableStandart.dtStandardFill);
-                tableStandart.dtFillFull += dtFillFullStandart;
                 threadStandart.Start();
             };
             Invoke(action);
@@ -123,10 +181,30 @@ namespace Studing_Journal
             switch (cbFilterStandart.CheckState)
             {
                 case (CheckState.Checked):
-                    
+                    DataBaseTables data = new DataBaseTables();
+                    data.qrDepartment = filterDepartment + " and [Department_Number] like '%" + tbDepartmentSearch.Text + "%' or [Department_Name] like '%" + tbDepartmentSearch.Text + "%'";
+                    data.dtDepartmentFill();
+                    dgvDepartment.DataSource = data.dtDepartment;
+                    dgvDepartment.Columns[0].Visible = false;
+                    dgvDepartment.Columns[1].HeaderText = "Номер специальности";
+                    dgvDepartment.Columns[2].HeaderText = "Название специальности";
+                    dgvDepartment.Columns[3].Visible = false;
+                    dgvDepartment.Columns[4].HeaderText = "Группа стандартов";
+                    dgvDepartment.Columns[5].Visible = false;
                     break;
                 case (CheckState.Unchecked):
-                    
+                    dgvDepartmentFill();
+                    for (int i = 0; i < dgvDepartment.RowCount; i++)
+                    {
+                        for (int j = 0; j < dgvDepartment.ColumnCount; j++)
+                        {
+                            if (dgvDepartment.Rows[i].Cells[j].Value != null)
+                                if (dgvDepartment.Rows[i].Cells[j].Value.ToString().Contains(tbDepartmentSearch.Text))
+                                {
+                                    dgvDepartment.Rows[i].Selected = true;
+                                }
+                        }
+                    }
                     break;
             }
         }
@@ -153,6 +231,42 @@ namespace Studing_Journal
 
                     break;
             }
+        }
+
+        private void btDepartmentInsert_Click(object sender, EventArgs e)
+        {
+            procedure.spDepartment_Insert(mtbDepartmentNumber.Text, tbDepartmentName
+                .Text, Convert.ToInt32(cbstandartDepartment.SelectedValue.ToString()));
+            mtbDepartmentNumber.Clear();
+            tbDepartmentName.Clear();
+        }
+
+        private void btDepartmentUpdate_Click(object sender, EventArgs e)
+        {
+            procedure.spDepartment_Update(Convert.ToInt32(dgvDepartment.CurrentRow.Cells[0].Value.ToString()), mtbDepartmentNumber.Text, tbDepartmentName.Text, Convert.ToInt32(cbstandartDepartment.SelectedValue.ToString()));
+        }
+
+        private void btDepartmentDelete_Click(object sender, EventArgs e)
+        {
+            switch(MessageBox.Show("Удаление специальности", "Удалить специальность " + mtbDepartmentNumber.Text + " " + tbDepartmentName.Name + "?", MessageBoxButtons.YesNo, MessageBoxIcon.Question))
+            {
+                case DialogResult.Yes:
+                    procedure.spDepartment_Delete(Convert.ToInt32(dgvDepartment.CurrentRow.Cells[0].Value.ToString()));
+                    break;
+
+                case DialogResult.No:
+                    break;
+            }
+        }
+
+        private void tbDepartmentSearch_TextChanged(object sender, EventArgs e)
+        {
+            cbFilterStandart_CheckedChanged(sender, e);
+        }
+
+        private void btClose_Click(object sender, EventArgs e)
+        {
+            Close();
         }
     }
 }
